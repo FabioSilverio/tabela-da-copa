@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     description: "Acompanhe a Copa 2026 com estilo retrô: tabelas, jogos, resultados ao vivo e simulações.",
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon.svg",
   },
 };
 
