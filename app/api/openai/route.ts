@@ -1,17 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY ?? "",
-});
-
 export async function POST(req: NextRequest) {
   try {
-    const { prompt, model = "o3-mini" } = await req.json();
+    const { prompt, model = "gpt-4o-mini", apiKey: clientKey } = await req.json();
 
     if (!prompt || typeof prompt !== "string") {
       return NextResponse.json({ error: "Prompt inválido" }, { status: 400 });
     }
+
+    // Tenta usar a chave enviada pelo cliente, senão usa a do servidor
+    const apiKey = clientKey || process.env.OPENAI_API_KEY;
+    
+    if (!apiKey) {
+      return NextResponse.json({ error: "Chave da OpenAI não configurada. Insira em Configurações ou configure OPENAI_API_KEY no servidor." }, { status: 500 });
+    }
+
+    const openai = new OpenAI({ apiKey });
 
     const response = await openai.chat.completions.create({
       model,

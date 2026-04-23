@@ -42,10 +42,17 @@ export default function ConfiguracoesPage() {
     setTestResult(null);
     try {
       const endpoint = provider === "openai" ? "/api/openai" : "/api/xai";
+      const apiKey = provider === "openai" ? openaiKey : xaiKey;
+      
+      if (!apiKey) {
+        setTestResult({ provider, success: false, message: "Chave não preenchida. Digite a chave acima." });
+        return;
+      }
+      
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: "Responda apenas 'OK'" }),
+        body: JSON.stringify({ prompt: "Responda apenas 'OK'", apiKey }),
       });
       
       if (res.ok) {
