@@ -18,7 +18,7 @@ export interface SquadData {
 export const squads: Record<string, SquadData> = {
   bra: {
     formation: "4-3-3",
-    coach: "Dorival Júnior",
+    coach: "Carlo Ancelotti",
     players: [
       { name: "Alisson", position: "GOL", number: 1, club: "Liverpool", age: 32, caps: 72, goals: 0, isStarter: true },
       { name: "Danilo", position: "LD", number: 2, club: "Juventus", age: 33, caps: 65, goals: 1, isStarter: true },

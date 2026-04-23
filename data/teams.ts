@@ -31,7 +31,7 @@ export const teamsData: TeamData[] = [
   { id: 'sui', name: 'Suíça', slug: 'suica', code: 'CH', group: 'B', ranking: 17, form: ['D','W','L','W','D'], goalsFor: 9, goalsAgainst: 7, recentGoalsFor: 6, recentGoalsAgainst: 5, titles: 0, coach: 'Murat Yakin', confederation: 'UEFA' },
 
   // Grupo C
-  { id: 'bra', name: 'Brasil', slug: 'brasil', code: 'BR', group: 'C', ranking: 5, form: ['W','D','W','W','L'], goalsFor: 14, goalsAgainst: 6, recentGoalsFor: 10, recentGoalsAgainst: 4, titles: 5, coach: 'Dorival Júnior', confederation: 'CONMEBOL' },
+  { id: 'bra', name: 'Brasil', slug: 'brasil', code: 'BR', group: 'C', ranking: 5, form: ['W','D','W','W','L'], goalsFor: 14, goalsAgainst: 6, recentGoalsFor: 10, recentGoalsAgainst: 4, titles: 5, coach: 'Carlo Ancelotti', confederation: 'CONMEBOL' },
   { id: 'mar', name: 'Marrocos', slug: 'marrocos', code: 'MA', group: 'C', ranking: 11, form: ['W','D','W','W','L'], goalsFor: 11, goalsAgainst: 5, recentGoalsFor: 8, recentGoalsAgainst: 4, titles: 0, coach: 'Walid Regragui', confederation: 'CAF' },
   { id: 'hai', name: 'Haiti', slug: 'haiti', code: 'HT', group: 'C', ranking: 84, form: ['L','D','W','L','D'], goalsFor: 4, goalsAgainst: 11, recentGoalsFor: 3, recentGoalsAgainst: 8, titles: 0, coach: 'Sébastien Migné', confederation: 'CONCACAF' },
   { id: 'sco', name: 'Escócia', slug: 'escocia', code: 'GB-SCT', group: 'C', ranking: 36, form: ['W','D','L','W','W'], goalsFor: 10, goalsAgainst: 7, recentGoalsFor: 7, recentGoalsAgainst: 5, titles: 0, coach: 'Steve Clarke', confederation: 'UEFA' },

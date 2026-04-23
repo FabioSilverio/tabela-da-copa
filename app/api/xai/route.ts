@@ -8,11 +8,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Prompt inválido" }, { status: 400 });
     }
 
+    const apiKey = process.env.XAI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: "XAI_API_KEY não configurada no servidor" }, { status: 500 });
+    }
+
     const response = await fetch("https://api.x.ai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.XAI_API_KEY ?? ""}`,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model,

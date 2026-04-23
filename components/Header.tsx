@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
-import { Menu, X, Trophy, Settings, Sun, Moon } from "lucide-react";
+import { Menu, X, Trophy, Settings, Sun, Moon, MessageSquare } from "lucide-react";
 import { SearchBar } from "./SearchBar";
 import { useTheme } from "./ThemeProvider";
 
@@ -13,6 +13,7 @@ const navItems = [
   { href: "/ao-vivo", label: "Ao Vivo" },
   { href: "/selecoes", label: "Seleções" },
   { href: "/simulador", label: "Simulador" },
+  { href: "/chat", label: "Chat IA", icon: MessageSquare },
 ];
 
 export function Header() {
@@ -46,8 +47,9 @@ export function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="px-3 py-1 text-xs uppercase tracking-wider no-underline hover:bg-black/5"
+                className="px-3 py-1 text-xs uppercase tracking-wider no-underline hover:bg-black/5 flex items-center gap-1"
               >
+                {'icon' in item && item.icon && <item.icon className="w-3 h-3" />}
                 {item.label}
               </Link>
             ))}

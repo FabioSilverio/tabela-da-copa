@@ -2,14 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { SectionTitle } from "@/components/SectionTitle";
-import { Key, Save, Trash2, AlertTriangle, Check, Info } from "lucide-react";
+import { Key, Save, Trash2, AlertTriangle, Check, Server, Globe } from "lucide-react";
 
 export default function ConfiguracoesPage() {
   const [openaiKey, setOpenaiKey] = useState("");
   const [xaiKey, setXaiKey] = useState("");
   const [saved, setSaved] = useState(false);
+  const [testResult, setTestResult] = useState<{provider: string; success: boolean; message: string} | null>(null);
 
   useEffect(() => {
+    // Carregar do localStorage (para desenvolvimento local)
     const oai = localStorage.getItem("openai_api_key");
     const xai = localStorage.getItem("xai_api_key");
     if (oai) setOpenaiKey(oai);
@@ -36,23 +38,41 @@ export default function ConfiguracoesPage() {
     setTimeout(() => setSaved(false), 2000);
   };
 
+  const testConnection = async (provider: "openai" | "xai") => {
+    setTestResult(null);
+    try {
+      const endpoint = provider === "openai" ? "/api/openai" : "/api/xai";
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: "Responda apenas 'OK'" }),
+      });
+      
+      if (res.ok) {
+        setTestResult({ provider, success: true, message: "Conexão bem-sucedida!" });
+      } else {
+        const data = await res.json();
+        setTestResult({ provider, success: false, message: data.error ?? `Erro ${res.status}` });
+      }
+    } catch (e: unknown) {
+      setTestResult({ provider, success: false, message: e instanceof Error ? e.message : "Erro de conexão" });
+    }
+  };
+
   return (
     <div className="space-y-8 max-w-2xl mx-auto">
-      <SectionTitle subtitle="Configure suas chaves de API para análise com IA">
+      <SectionTitle subtitle="Configure as chaves de API para análise com IA">
         Configurações
       </SectionTitle>
 
-      {/* Info sobre OAuth */}
+      {/* Info sobre como funciona */}
       <div className="panel p-4 flex items-start gap-3">
-        <Info className="w-4 h-4 mt-0.5 shrink-0 opacity-70" />
+        <Server className="w-4 h-4 mt-0.5 shrink-0 opacity-70" />
         <div className="text-xs leading-relaxed opacity-90 space-y-2">
           <p>
-            <strong className="uppercase tracking-wider">Sobre OAuth:</strong> A OpenAI não oferece fluxo OAuth público 
-            para usuários finais. A autenticação é feita exclusivamente via <strong>API Key</strong>. 
-            Basta gerar uma chave no painel da OpenAI e colar abaixo.
-          </p>
-          <p>
-            Isso funciona para <strong>todos os modelos</strong>: GPT-4o, GPT-4o-mini, o3-mini, Codex, etc.
+            <strong className="uppercase tracking-wider">Como funciona:</strong> As requisições para OpenAI e xAI 
+            são feitas através de proxies no nosso servidor. Você pode configurar as chaves abaixo para uso local, 
+            ou o administrador pode configurar via variáveis de ambiente no servidor.
           </p>
         </div>
       </div>
@@ -76,9 +96,18 @@ export default function ConfiguracoesPage() {
               onChange={(e) => setOpenaiKey(e.target.value)}
               className="retro-input w-full text-xs"
             />
-            <p className="text-[10px] uppercase tracking-wider opacity-50">
-              Obtenha em: <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline">platform.openai.com/api-keys</a>
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] uppercase tracking-wider opacity-50">
+                Obtenha em: <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline">platform.openai.com/api-keys</a>
+              </p>
+              <button 
+                onClick={() => testConnection("openai")}
+                className="text-[10px] uppercase tracking-wider retro-btn py-1 px-2"
+              >
+                <Globe className="w-3 h-3 inline mr-1" />
+                Testar
+              </button>
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -92,11 +121,27 @@ export default function ConfiguracoesPage() {
               onChange={(e) => setXaiKey(e.target.value)}
               className="retro-input w-full text-xs"
             />
-            <p className="text-[10px] uppercase tracking-wider opacity-50">
-              Obtenha em: <a href="https://console.x.ai" target="_blank" rel="noopener noreferrer" className="underline">console.x.ai</a>
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] uppercase tracking-wider opacity-50">
+                Obtenha em: <a href="https://console.x.ai" target="_blank" rel="noopener noreferrer" className="underline">console.x.ai</a>
+              </p>
+              <button 
+                onClick={() => testConnection("xai")}
+                className="text-[10px] uppercase tracking-wider retro-btn py-1 px-2"
+              >
+                <Globe className="w-3 h-3 inline mr-1" />
+                Testar
+              </button>
+            </div>
           </div>
         </div>
+
+        {testResult && (
+          <div className={`flex items-center gap-2 text-xs p-2 border ${testResult.success ? 'text-green-800 bg-green-100/20 border-green-800/20' : 'text-red-800 bg-red-100/20 border-red-800/20'}`}>
+            {testResult.success ? <Check className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
+            <strong className="uppercase">{testResult.provider}:</strong> {testResult.message}
+          </div>
+        )}
 
         <div className="flex items-center gap-3 pt-2">
           <button
@@ -111,7 +156,7 @@ export default function ConfiguracoesPage() {
             className="retro-btn flex items-center gap-2"
           >
             <Trash2 className="w-3 h-3" />
-            Limpar Tudo
+            Limpar
           </button>
         </div>
 
@@ -128,7 +173,7 @@ export default function ConfiguracoesPage() {
         <div className="text-xs leading-relaxed opacity-90 space-y-2">
           <p>
             <strong className="uppercase tracking-wider">Segurança:</strong> suas chaves são armazenadas apenas no navegador (localStorage).
-            Elas nunca são enviadas para nossos servidores. As requisições são feitas diretamente do seu navegador para as APIs.
+            As requisições são enviadas para nosso servidor proxy, que então repassa para as APIs. Isso evita problemas de CORS.
           </p>
         </div>
       </div>
