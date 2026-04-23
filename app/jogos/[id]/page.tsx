@@ -1,30 +1,34 @@
 import { notFound } from "next/navigation";
 import { SectionTitle } from "@/components/SectionTitle";
-import { getMatchById } from "@/data/matches";
+import { dataProvider } from "@/services/data-provider";
 import { getTeamFlagUrl, formatDateBR, formatTimeBR } from "@/lib/utils";
-import { Tv, Radio, MapPin, Calendar, Clock } from "lucide-react";
 import { AIInsight } from "@/components/AIInsight";
+import { Tv, Radio, MapPin, Calendar, Clock } from "lucide-react";
 
 export function generateStaticParams() {
-  const { allMatches } = require("@/data/matches");
-  return allMatches.map((m: { id: string }) => ({ id: m.id }));
+  const matches = dataProvider.getAllMatches();
+  return matches.map((m) => ({ id: m.id }));
 }
 
 export function generateMetadata({ params }: { params: { id: string } }) {
-  const match = getMatchById(params.id);
+  const match = dataProvider.getMatchById(params.id);
   if (!match) return { title: "Jogo não encontrado" };
+  const homeName = match.homeTeam?.name ?? "A definir";
+  const awayName = match.awayTeam?.name ?? "A definir";
   return {
-    title: `${match.homeTeam.name} x ${match.awayTeam.name}`,
-    description: `Detalhes do confronto entre ${match.homeTeam.name} e ${match.awayTeam.name} na Copa 2026.`,
+    title: `${homeName} x ${awayName}`,
+    description: `Detalhes do confronto entre ${homeName} e ${awayName} na Copa 2026.`,
   };
 }
 
 export default function MatchDetailPage({ params }: { params: { id: string } }) {
-  const match = getMatchById(params.id);
+  const match = dataProvider.getMatchById(params.id);
   if (!match) return notFound();
 
   const isFinished = match.status === "finished";
   const isLive = match.status === "live";
+  const home = match.homeTeam;
+  const away = match.awayTeam;
 
   return (
     <div className="space-y-8 max-w-3xl mx-auto">
@@ -39,12 +43,18 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
         <div className="px-6 py-8">
           <div className="flex items-center justify-between gap-6">
             <div className="flex-1 flex flex-col items-center gap-2 text-center">
-              <img
-                src={getTeamFlagUrl(match.homeTeam.code)}
-                alt={match.homeTeam.name}
-                className="w-12 h-8 object-cover border border-foreground/30"
-              />
-              <h2 className="text-sm font-bold uppercase tracking-wider">{match.homeTeam.name}</h2>
+              {home ? (
+                <>
+                  <img
+                    src={getTeamFlagUrl(home.code)}
+                    alt={home.name}
+                    className="w-12 h-8 object-cover border border-foreground/30"
+                  />
+                  <h2 className="text-sm font-bold uppercase tracking-wider">{home.name}</h2>
+                </>
+              ) : (
+                <span className="text-sm font-bold uppercase tracking-wider opacity-50">A definir</span>
+              )}
             </div>
 
             <div className="flex flex-col items-center gap-2 min-w-[100px]">
@@ -54,12 +64,18 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
             </div>
 
             <div className="flex-1 flex flex-col items-center gap-2 text-center">
-              <img
-                src={getTeamFlagUrl(match.awayTeam.code)}
-                alt={match.awayTeam.name}
-                className="w-12 h-8 object-cover border border-foreground/30"
-              />
-              <h2 className="text-sm font-bold uppercase tracking-wider">{match.awayTeam.name}</h2>
+              {away ? (
+                <>
+                  <img
+                    src={getTeamFlagUrl(away.code)}
+                    alt={away.name}
+                    className="w-12 h-8 object-cover border border-foreground/30"
+                  />
+                  <h2 className="text-sm font-bold uppercase tracking-wider">{away.name}</h2>
+                </>
+              ) : (
+                <span className="text-sm font-bold uppercase tracking-wider opacity-50">A definir</span>
+              )}
             </div>
           </div>
         </div>
@@ -79,11 +95,11 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
           </div>
           <div className="flex items-center gap-2">
             <Tv className="w-3 h-3" />
-            TV: {match.tv}
+            TV: {match.tv || "a confirmar"}
           </div>
           <div className="flex items-center gap-2">
             <Radio className="w-3 h-3" />
-            Rádio: {match.radio}
+            Rádio: {match.radio || "a confirmar"}
           </div>
         </div>
       </div>
@@ -113,7 +129,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
                 </span>
                 <span>{ev.player}</span>
                 <span className="opacity-60">
-                  ({ev.team === "home" ? match.homeTeam.name : match.awayTeam.name})
+                  ({ev.team === "home" ? home?.name ?? "Casa" : away?.name ?? "Fora"})
                 </span>
               </div>
             ))}
@@ -122,7 +138,7 @@ export default function MatchDetailPage({ params }: { params: { id: string } }) 
       )}
 
       <section>
-        <AIInsight prompt={`Analise o confronto entre ${match.homeTeam.name} e ${match.awayTeam.name} na Copa do Mundo 2026. Fale sobre histórico, estilo de jogo e o que esperar da partida.`} />
+        <AIInsight prompt={`Analise o confronto entre ${home?.name ?? "A definir"} e ${away?.name ?? "A definir"} na Copa do Mundo 2026. Fale sobre histórico, estilo de jogo e o que esperar da partida.`} />
       </section>
     </div>
   );

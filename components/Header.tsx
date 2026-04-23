@@ -43,34 +43,37 @@ export function Header() {
           </div>
 
           <button
+            type="button"
             className="md:hidden retro-btn p-2"
-            onClick={() => setOpen(!open)}
-            aria-label="Menu"
+            onClick={() => setOpen((prev) => !prev)}
+            aria-label={open ? "Fechar menu" : "Abrir menu"}
+            aria-expanded={open}
           >
             {open ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
       </div>
 
-      {open && (
-        <div className="md:hidden border-t border-foreground retro-border bg-panel">
-          <div className="px-4 py-3 space-y-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="block px-2 py-1 text-xs uppercase tracking-wider no-underline hover:bg-black/5"
-                onClick={() => setOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <div className="pt-2">
-              <SearchBar />
-            </div>
+      <div
+        className={`md:hidden border-t border-foreground retro-border bg-panel transition-all duration-200 overflow-hidden ${open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+        aria-hidden={!open}
+      >
+        <div className="px-4 py-3 space-y-2">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="block px-2 py-1 text-xs uppercase tracking-wider no-underline hover:bg-black/5"
+              onClick={() => setOpen(false)}
+            >
+              {item.label}
+            </Link>
+          ))}
+          <div className="pt-2">
+            <SearchBar />
           </div>
         </div>
-      )}
+      </div>
     </header>
   );
 }

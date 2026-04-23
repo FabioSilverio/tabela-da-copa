@@ -1,15 +1,16 @@
+"use client";
+
 import { SectionTitle } from "@/components/SectionTitle";
 import { MatchCard } from "@/components/MatchCard";
-import { allMatches } from "@/data/matches";
-
-export const metadata = {
-  title: "Mata-Mata",
-  description: "Chaveamento completo da fase eliminatória da Copa do Mundo 2026.",
-};
+import { useMatches } from "@/hooks/useApi";
+import { Loader2 } from "lucide-react";
 
 export default function KnockoutPage() {
-  const groupMatches = allMatches.filter((m) => m.phase.startsWith("Grupo"));
-  const knockoutMatches = allMatches.filter((m) => !m.phase.startsWith("Grupo"));
+  const { data, loading, error } = useMatches();
+  const matches = data?.matches || [];
+  const groupMatches = matches.filter((m) => m.group);
+  const knockoutMatches = matches.filter((m) => !m.group && m.phase !== "Final" && m.phase !== "Disputa de 3º Lugar");
+  const finalMatches = matches.filter((m) => m.phase === "Final" || m.phase === "Disputa de 3º Lugar");
 
   return (
     <div className="space-y-10">
@@ -17,11 +18,23 @@ export default function KnockoutPage() {
         <SectionTitle subtitle="Todos os jogos da fase de grupos">
           Fase de Grupos
         </SectionTitle>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {groupMatches.slice(0, 12).map((match) => (
-            <MatchCard key={match.id} match={match} />
-          ))}
-        </div>
+        {loading && (
+          <div className="flex items-center gap-2 text-xs uppercase tracking-wider opacity-70">
+            <Loader2 className="w-4 h-4 animate-spin" /> Carregando...
+          </div>
+        )}
+        {error && (
+          <div className="panel p-4 text-xs uppercase tracking-wider text-red-800">
+            Erro: {error}
+          </div>
+        )}
+        {data && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {groupMatches.slice(0, 12).map((match) => (
+              <MatchCard key={match.id} match={match} />
+            ))}
+          </div>
+        )}
       </section>
 
       <section>
@@ -42,6 +55,19 @@ export default function KnockoutPage() {
           </div>
         )}
       </section>
+
+      {finalMatches.length > 0 && (
+        <section>
+          <SectionTitle subtitle="Finais">
+            Decisões
+          </SectionTitle>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {finalMatches.map((match) => (
+              <MatchCard key={match.id} match={match} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

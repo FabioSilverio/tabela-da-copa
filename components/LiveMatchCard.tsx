@@ -3,6 +3,9 @@ import { formatTimeBR, getTeamFlagUrl } from "@/lib/utils";
 import { Activity } from "lucide-react";
 
 export function LiveMatchCard({ match }: { match: Match }) {
+  const home = match.homeTeam;
+  const away = match.awayTeam;
+
   return (
     <div className="panel-dark p-0">
       <div className="flex items-center justify-between px-3 py-2 border-b border-white/10">
@@ -18,12 +21,18 @@ export function LiveMatchCard({ match }: { match: Match }) {
       <div className="px-4 py-4">
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 flex flex-col items-center gap-1 text-center">
-            <img
-              src={getTeamFlagUrl(match.homeTeam.code)}
-              alt={match.homeTeam.name}
-              className="w-8 h-5 object-cover border border-white/20"
-            />
-            <span className="text-xs font-bold uppercase">{match.homeTeam.name}</span>
+            {home ? (
+              <>
+                <img
+                  src={getTeamFlagUrl(home.code)}
+                  alt={home.name}
+                  className="w-8 h-5 object-cover border border-white/20"
+                />
+                <span className="text-xs font-bold uppercase">{home.name}</span>
+              </>
+            ) : (
+              <span className="text-xs font-bold uppercase opacity-50">A definir</span>
+            )}
           </div>
 
           <div className="text-2xl font-bold tracking-wider">
@@ -31,12 +40,18 @@ export function LiveMatchCard({ match }: { match: Match }) {
           </div>
 
           <div className="flex-1 flex flex-col items-center gap-1 text-center">
-            <img
-              src={getTeamFlagUrl(match.awayTeam.code)}
-              alt={match.awayTeam.name}
-              className="w-8 h-5 object-cover border border-white/20"
-            />
-            <span className="text-xs font-bold uppercase">{match.awayTeam.name}</span>
+            {away ? (
+              <>
+                <img
+                  src={getTeamFlagUrl(away.code)}
+                  alt={away.name}
+                  className="w-8 h-5 object-cover border border-white/20"
+                />
+                <span className="text-xs font-bold uppercase">{away.name}</span>
+              </>
+            ) : (
+              <span className="text-xs font-bold uppercase opacity-50">A definir</span>
+            )}
           </div>
         </div>
 
@@ -46,7 +61,7 @@ export function LiveMatchCard({ match }: { match: Match }) {
               <div key={i} className="flex items-center gap-2 text-[10px] uppercase tracking-wider">
                 <span className="opacity-60">{ev.minute}'</span>
                 <span className="font-bold">{ev.type === "goal" ? "⚽" : ev.type === "red_card" ? "🟥" : "🟨"}</span>
-                <span>{ev.player} ({ev.team === "home" ? match.homeTeam.name : match.awayTeam.name})</span>
+                <span>{ev.player} ({ev.team === "home" ? home?.name ?? "Casa" : away?.name ?? "Fora"})</span>
               </div>
             ))}
           </div>

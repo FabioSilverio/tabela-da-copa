@@ -1,14 +1,14 @@
+"use client";
+
 import { SectionTitle } from "@/components/SectionTitle";
 import { SimulationBlock } from "@/components/SimulationBlock";
-import { teams } from "@/data/teams";
-import { Info } from "lucide-react";
-
-export const metadata = {
-  title: "Simulador",
-  description: "Simule confrontos entre seleções da Copa 2026 com base em estatísticas e ranking.",
-};
+import { useTeams } from "@/hooks/useApi";
+import { Info, Loader2 } from "lucide-react";
 
 export default function SimulatorPage() {
+  const { data, loading } = useTeams();
+  const teams = data?.teams || [];
+
   return (
     <div className="space-y-8 max-w-3xl mx-auto">
       <SectionTitle subtitle="Compare duas seleções e veja probabilidades estimadas">
@@ -30,7 +30,13 @@ export default function SimulatorPage() {
         </div>
       </div>
 
-      <SimulationBlock teams={teams} />
+      {loading ? (
+        <div className="flex items-center gap-2 text-xs uppercase tracking-wider opacity-70">
+          <Loader2 className="w-4 h-4 animate-spin" /> Carregando seleções...
+        </div>
+      ) : (
+        <SimulationBlock teams={teams} />
+      )}
     </div>
   );
 }

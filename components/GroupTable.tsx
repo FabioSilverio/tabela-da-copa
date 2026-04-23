@@ -1,7 +1,7 @@
-import { Group } from "@/types";
+import { GroupStandings } from "@/services/data-provider";
 import { getTeamFlagUrl } from "@/lib/utils";
 
-export function GroupTable({ group }: { group: Group }) {
+export function GroupTable({ group }: { group: GroupStandings }) {
   return (
     <div className="panel mb-6">
       <div className="px-4 py-2 border-b border-foreground retro-border bg-black/5">
@@ -23,31 +23,29 @@ export function GroupTable({ group }: { group: Group }) {
             </tr>
           </thead>
           <tbody>
-            {group.teams
-              .sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference)
-              .map((team, idx) => (
-                <tr
-                  key={team.id}
-                  className={`border-b border-foreground/10 ${idx < 2 ? "bg-black/[0.03]" : ""}`}
-                >
-                  <td className="px-3 py-2 font-bold">{idx + 1}</td>
-                  <td className="px-3 py-2 flex items-center gap-2">
-                    <img
-                      src={getTeamFlagUrl(team.code)}
-                      alt={team.name}
-                      className="w-5 h-3 object-cover border border-foreground/30"
-                    />
-                    <span className="font-bold">{team.name}</span>
-                  </td>
-                  <td className="text-center px-2 py-2 font-bold">{team.points}</td>
-                  <td className="text-center px-2 py-2">{team.played}</td>
-                  <td className="text-center px-2 py-2">{team.wins}</td>
-                  <td className="text-center px-2 py-2">{team.draws}</td>
-                  <td className="text-center px-2 py-2">{team.losses}</td>
-                  <td className="text-center px-2 py-2 font-bold">{team.goalDifference}</td>
-                  <td className="text-center px-2 py-2">{team.goalsFor}</td>
-                </tr>
-              ))}
+            {group.teams.map((team, idx) => (
+              <tr
+                key={team.team.id}
+                className={`border-b border-foreground/10 ${idx < 2 ? "bg-black/[0.03]" : ""}`}
+              >
+                <td className="px-3 py-2 font-bold">{idx + 1}</td>
+                <td className="px-3 py-2 flex items-center gap-2">
+                  <img
+                    src={getTeamFlagUrl(team.team.code)}
+                    alt={team.team.name}
+                    className="w-5 h-3 object-cover border border-foreground/30"
+                  />
+                  <span className="font-bold">{team.team.name}</span>
+                </td>
+                <td className="text-center px-2 py-2 font-bold">{team.points}</td>
+                <td className="text-center px-2 py-2">{team.played}</td>
+                <td className="text-center px-2 py-2">{team.wins}</td>
+                <td className="text-center px-2 py-2">{team.draws}</td>
+                <td className="text-center px-2 py-2">{team.losses}</td>
+                <td className="text-center px-2 py-2 font-bold">{team.goalDifference}</td>
+                <td className="text-center px-2 py-2">{team.goalsFor}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

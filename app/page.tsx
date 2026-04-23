@@ -1,15 +1,22 @@
+"use client";
+
 import Link from "next/link";
 import { SectionTitle } from "@/components/SectionTitle";
 import { MatchCard } from "@/components/MatchCard";
 import { TeamCard } from "@/components/TeamCard";
 import { SimulationBlock } from "@/components/SimulationBlock";
-import { teams } from "@/data/teams";
-import { allMatches } from "@/data/matches";
-import { Calendar, Trophy, Tv, BarChart3, ChevronRight } from "lucide-react";
+import { useMatches, useTeams } from "@/hooks/useApi";
+import { Calendar, Trophy, Tv, BarChart3, ChevronRight, Loader2 } from "lucide-react";
 
 export default function HomePage() {
-  const upcomingMatches = allMatches.filter((m) => m.status === "not_started").slice(0, 4);
-  const featuredTeams = teams.filter((t) => ["bra", "arg", "fra", "eng", "ger", "esp"].includes(t.id));
+  const { data: matchesData, loading: matchesLoading } = useMatches("upcoming=true&limit=4");
+  const { data: teamsData, loading: teamsLoading } = useTeams();
+
+  const upcomingMatches = matchesData?.matches || [];
+  const featuredTeams = (teamsData?.teams || []).filter((t) =>
+    ["bra", "arg", "fra", "eng", "ger", "esp"].includes(t.id)
+  );
+  const allTeams = teamsData?.teams || [];
 
   return (
     <div className="space-y-12">
@@ -50,16 +57,24 @@ export default function HomePage() {
         <SectionTitle subtitle="Confrontos programados da fase de grupos">
           Próximos Jogos
         </SectionTitle>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {upcomingMatches.map((match) => (
-            <MatchCard key={match.id} match={match} />
-          ))}
-        </div>
-        <div className="mt-4">
-          <Link href="/mata-mata" className="text-xs uppercase tracking-wider flex items-center gap-1 no-underline hover:opacity-70">
-            Ver todos os jogos <ChevronRight className="w-3 h-3" />
-          </Link>
-        </div>
+        {matchesLoading ? (
+          <div className="flex items-center gap-2 text-xs uppercase tracking-wider opacity-70">
+            <Loader2 className="w-4 h-4 animate-spin" /> Carregando jogos...
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {upcomingMatches.map((match) => (
+                <MatchCard key={match.id} match={match} />
+              ))}
+            </div>
+            <div className="mt-4">
+              <Link href="/mata-mata" className="text-xs uppercase tracking-wider flex items-center gap-1 no-underline hover:opacity-70">
+                Ver todos os jogos <ChevronRight className="w-3 h-3" />
+              </Link>
+            </div>
+          </>
+        )}
       </section>
 
       {/* Seleções em destaque */}
@@ -67,16 +82,24 @@ export default function HomePage() {
         <SectionTitle subtitle="Principais candidatas ao título">
           Seleções em Destaque
         </SectionTitle>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {featuredTeams.map((team) => (
-            <TeamCard key={team.id} team={team} />
-          ))}
-        </div>
-        <div className="mt-4">
-          <Link href="/selecoes" className="text-xs uppercase tracking-wider flex items-center gap-1 no-underline hover:opacity-70">
-            Ver todas as seleções <ChevronRight className="w-3 h-3" />
-          </Link>
-        </div>
+        {teamsLoading ? (
+          <div className="flex items-center gap-2 text-xs uppercase tracking-wider opacity-70">
+            <Loader2 className="w-4 h-4 animate-spin" /> Carregando seleções...
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {featuredTeams.map((team) => (
+                <TeamCard key={team.id} team={team} />
+              ))}
+            </div>
+            <div className="mt-4">
+              <Link href="/selecoes" className="text-xs uppercase tracking-wider flex items-center gap-1 no-underline hover:opacity-70">
+                Ver todas as seleções <ChevronRight className="w-3 h-3" />
+              </Link>
+            </div>
+          </>
+        )}
       </section>
 
       {/* Simulador rápido */}
@@ -84,7 +107,7 @@ export default function HomePage() {
         <SectionTitle subtitle="Compare duas seleções com base em estatísticas">
           Simulador Rápido
         </SectionTitle>
-        <SimulationBlock teams={teams} />
+        <SimulationBlock teams={allTeams} />
       </section>
     </div>
   );

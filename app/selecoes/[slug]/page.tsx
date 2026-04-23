@@ -1,19 +1,18 @@
 import { notFound } from "next/navigation";
 import { SectionTitle } from "@/components/SectionTitle";
-import { getTeamBySlug } from "@/data/teams";
-import { getMatchesByTeam } from "@/data/matches";
-import { getTeamFlagUrl, formatDateBR } from "@/lib/utils";
+import { dataProvider } from "@/services/data-provider";
+import { getTeamFlagUrl } from "@/lib/utils";
 import { MatchCard } from "@/components/MatchCard";
 import { AIInsight } from "@/components/AIInsight";
 import { Trophy, Users, BarChart3 } from "lucide-react";
 
 export function generateStaticParams() {
-  const { teams } = require("@/data/teams");
-  return teams.map((t: { slug: string }) => ({ slug: t.slug }));
+  const teams = dataProvider.getAllTeams();
+  return teams.map((t) => ({ slug: t.slug }));
 }
 
 export function generateMetadata({ params }: { params: { slug: string } }) {
-  const team = getTeamBySlug(params.slug);
+  const team = dataProvider.getTeamBySlug(params.slug);
   if (!team) return { title: "Seleção não encontrada" };
   return {
     title: team.name,
@@ -22,10 +21,10 @@ export function generateMetadata({ params }: { params: { slug: string } }) {
 }
 
 export default function TeamDetailPage({ params }: { params: { slug: string } }) {
-  const team = getTeamBySlug(params.slug);
+  const team = dataProvider.getTeamBySlug(params.slug);
   if (!team) return notFound();
 
-  const matches = getMatchesByTeam(team.id);
+  const matches = dataProvider.getMatchesByTeamId(team.id);
 
   return (
     <div className="space-y-10">
