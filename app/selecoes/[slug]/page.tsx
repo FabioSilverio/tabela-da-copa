@@ -8,8 +8,9 @@ import { MatchCard } from "@/components/MatchCard";
 import { getTeamFlagUrl } from "@/lib/utils";
 import { useMatches, useTeams } from "@/hooks/useApi";
 import { getSquad, getPositionLabel } from "@/data/squads";
+import { getMarketData } from "@/data/prediction-markets";
 import { AIInsight } from "@/components/AIInsight";
-import { Trophy, Users, BarChart3, Calendar, Shield, Search, ChevronRight, Loader2, Shirt, Goal, Star } from "lucide-react";
+import { Trophy, Users, BarChart3, Calendar, Shield, Search, ChevronRight, Loader2, Shirt, Goal, Star, TrendingUp, DollarSign } from "lucide-react";
 
 export default function TeamDetailPage() {
   const params = useParams();
@@ -276,6 +277,43 @@ export default function TeamDetailPage() {
               <StatBox label="Média Gols Contra" value={team.recentGoalsAgainst} icon={Shield} />
             </div>
           </div>
+
+          {/* Dados de Mercado */}
+          {(() => {
+            const market = team ? getMarketData(team.id) : undefined;
+            if (!market) return null;
+            return (
+              <div className="panel p-6">
+                <h3 className="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" />
+                  Chances de Mercado
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="panel p-3 text-center">
+                    <Trophy className="w-4 h-4 mx-auto mb-1 opacity-60" />
+                    <div className="text-lg font-bold">{market.championImplied.toFixed(1)}%</div>
+                    <div className="text-[9px] uppercase tracking-wider opacity-60">Campea</div>
+                    <div className="text-[9px] opacity-50">Odds {market.championOdds}</div>
+                  </div>
+                  <div className="panel p-3 text-center">
+                    <BarChart3 className="w-4 h-4 mx-auto mb-1 opacity-60" />
+                    <div className="text-lg font-bold">{market.groupAdvanceImplied.toFixed(1)}%</div>
+                    <div className="text-[9px] uppercase tracking-wider opacity-60">Passa Grupo</div>
+                    <div className="text-[9px] opacity-50">Odds {market.groupAdvanceOdds}</div>
+                  </div>
+                  <div className="panel p-3 text-center">
+                    <DollarSign className="w-4 h-4 mx-auto mb-1 opacity-60" />
+                    <div className="text-lg font-bold">{market.source.toUpperCase()}</div>
+                    <div className="text-[9px] uppercase tracking-wider opacity-60">Fonte</div>
+                    <div className="text-[9px] opacity-50">{market.lastUpdated}</div>
+                  </div>
+                </div>
+                <p className="text-[9px] uppercase tracking-wider opacity-40 mt-3">
+                  Fonte: Sintese Polymarket + Kalshi + casas de apostas. Dados ilustrativos.
+                </p>
+              </div>
+            );
+          })()}
 
           <div className="panel p-6">
             <h3 className="text-sm font-bold uppercase tracking-widest mb-4">Forma (Últimos 5 Jogos)</h3>

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
-import { Menu, X, Trophy, Settings } from "lucide-react";
+import { Menu, X, Trophy, Settings, Sun, Moon } from "lucide-react";
 import { SearchBar } from "./SearchBar";
+import { useTheme } from "./ThemeProvider";
 
 const navItems = [
   { href: "/", label: "Início" },
@@ -17,6 +18,7 @@ const navItems = [
 export function Header() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -57,13 +59,29 @@ export function Header() {
             </Link>
           </nav>
 
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center gap-2">
             <SearchBar />
+            <button
+              onClick={toggleTheme}
+              className="retro-btn p-2"
+              aria-label={theme === "light" ? "Ativar dark mode" : "Ativar light mode"}
+              title={theme === "light" ? "Dark mode" : "Light mode"}
+            >
+              {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            </button>
           </div>
 
-          <button
-            type="button"
-            className="md:hidden retro-btn p-2"
+          <div className="flex md:hidden items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className="retro-btn p-2"
+              aria-label={theme === "light" ? "Ativar dark mode" : "Ativar light mode"}
+            >
+              {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            </button>
+            <button
+              type="button"
+              className="retro-btn p-2"
             onClick={() => setOpen(!open)}
             aria-label={open ? "Fechar menu" : "Abrir menu"}
             aria-expanded={open}
@@ -71,6 +89,7 @@ export function Header() {
             {open ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
+      </div>
       </div>
 
       {open && (

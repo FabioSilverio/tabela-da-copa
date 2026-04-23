@@ -9,6 +9,39 @@
   --border: #1a1a1a;
   --grid-line: rgba(26, 26, 26, 0.06);
   --accent: #8b3a3a;
+  --muted: #6b6b5e;
+  --link-hover: rgba(26, 26, 26, 0.06);
+  --btn-primary-bg: #1a1a1a;
+  --btn-primary-text: #d4cfb4;
+  --status-live: #c0392b;
+  --status-finished: #27ae60;
+  --status-upcoming: #7f8c8d;
+  --error-bg: rgba(192, 57, 43, 0.08);
+  --error-text: #8b3a3a;
+  --success-bg: rgba(39, 174, 96, 0.08);
+  --success-text: #1e6b38;
+}
+
+[data-theme="dark"] {
+  --background: #1a1a1a;
+  --foreground: #c8c2a8;
+  --panel: #2a2a2a;
+  --panel-dark: #c8c2a8;
+  --text-inverse: #1a1a1a;
+  --border: #c8c2a8;
+  --grid-line: rgba(200, 194, 168, 0.04);
+  --accent: #c0392b;
+  --muted: #8a8a7a;
+  --link-hover: rgba(200, 194, 168, 0.08);
+  --btn-primary-bg: #c8c2a8;
+  --btn-primary-text: #1a1a1a;
+  --status-live: #e74c3c;
+  --status-finished: #2ecc71;
+  --status-upcoming: #95a5a6;
+  --error-bg: rgba(231, 76, 60, 0.1);
+  --error-text: #e74c3c;
+  --success-bg: rgba(46, 204, 113, 0.1);
+  --success-text: #2ecc71;
 }
 
 @theme inline {
@@ -20,6 +53,7 @@
   --color-border: var(--border);
   --color-grid-line: var(--grid-line);
   --color-accent: var(--accent);
+  --color-muted: var(--muted);
   --font-mono: 'Courier Prime', 'Courier New', monospace;
   --font-sans: 'Courier Prime', 'Courier New', monospace;
 }
@@ -32,6 +66,7 @@ body {
     linear-gradient(var(--grid-line) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 24px 24px;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -44,6 +79,7 @@ h1, h2, h3, h4, h5, h6 {
   background-color: var(--panel);
   border: 1px solid var(--border);
   box-shadow: 3px 3px 0px rgba(0,0,0,0.12);
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
 .panel-dark {
@@ -51,6 +87,7 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-inverse);
   border: 1px solid var(--border);
   box-shadow: 3px 3px 0px rgba(0,0,0,0.25);
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
 
 .retro-border {
@@ -62,12 +99,14 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid var(--border);
   padding: 0.5rem 0.75rem;
   font-family: var(--font-mono);
+  color: var(--foreground);
   outline: none;
   box-shadow: inset 1px 1px 0 rgba(0,0,0,0.08);
+  transition: background-color 0.3s, border-color 0.3s, color 0.3s;
 }
 
 .retro-input:focus {
-  box-shadow: inset 1px 1px 0 rgba(0,0,0,0.12), 0 0 0 2px rgba(26,26,26,0.1);
+  box-shadow: inset 1px 1px 0 rgba(0,0,0,0.12), 0 0 0 2px var(--link-hover);
 }
 
 .retro-btn {
@@ -82,9 +121,10 @@ h1, h2, h3, h4, h5, h6 {
   text-transform: uppercase;
   font-size: 0.75rem;
   letter-spacing: 0.08em;
+  color: var(--foreground);
   cursor: pointer;
   box-shadow: 2px 2px 0px rgba(0,0,0,0.12);
-  transition: transform 0.05s, box-shadow 0.05s;
+  transition: transform 0.05s, box-shadow 0.05s, background-color 0.3s, border-color 0.3s, color 0.3s;
 }
 
 .retro-btn:hover {
@@ -97,12 +137,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .retro-btn-primary {
-  background: var(--panel-dark);
-  color: var(--text-inverse);
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
 }
 
 .retro-btn-primary:hover {
-  background: #2a2a2a;
+  background: var(--foreground);
+  color: var(--background);
 }
 
 .status-dot {
@@ -113,16 +154,16 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .status-live {
-  background: #c0392b;
+  background: var(--status-live);
   animation: pulse 1.5s infinite;
 }
 
 .status-finished {
-  background: #27ae60;
+  background: var(--status-finished);
 }
 
 .status-upcoming {
-  background: #7f8c8d;
+  background: var(--status-upcoming);
 }
 
 @keyframes pulse {
@@ -137,7 +178,7 @@ a {
 }
 
 a:hover {
-  background: rgba(26,26,26,0.06);
+  background: var(--link-hover);
 }
 
 .skeleton {
@@ -149,4 +190,8 @@ a:hover {
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+[data-theme="dark"] img {
+  filter: brightness(0.9);
 }

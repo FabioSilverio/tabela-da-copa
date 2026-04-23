@@ -2,7 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { getTeamFlagUrl } from "@/lib/utils";
-import { Loader2, Trophy, BarChart3, AlertTriangle, Play } from "lucide-react";
+import { getAllMarketData, getMarketData } from "@/data/prediction-markets";
+import { Loader2, Trophy, BarChart3, AlertTriangle, Play, TrendingUp, Activity } from "lucide-react";
 
 interface TeamStat {
   teamId: string;
@@ -26,16 +27,17 @@ export function TournamentSimulator() {
   const [results, setResults] = useState<TeamStat[] | null>(null);
   const [iterations, setIterations] = useState(1000);
   const [progress, setProgress] = useState(0);
+  const [showMarkets, setShowMarkets] = useState(true);
+
+  const marketData = getAllMarketData();
 
   const runSimulation = useCallback(async () => {
     setRunning(true);
     setProgress(0);
     setResults(null);
 
-    // Import dinâmico para não carregar no SSR
     const { runMonteCarlo } = await import("@/lib/tournament");
     
-    // Run in chunks to keep UI responsive
     const chunkSize = 100;
     const totalChunks = Math.ceil(iterations / chunkSize);
     let allStats = new Map<string, TeamStat>();
@@ -64,7 +66,6 @@ export function TournamentSimulator() {
             avgGoalsAgainst: stat.avgGoalsAgainst,
           });
         } else {
-          // Merge weighted averages
           const totalWeight = chunk * chunkSize + currentIterations;
           const w1 = (chunk * chunkSize) / totalWeight;
           const w2 = currentIterations / totalWeight;
@@ -83,7 +84,6 @@ export function TournamentSimulator() {
       });
 
       setProgress(Math.round(((chunk + 1) / totalChunks) * 100));
-      // Allow UI to update
       await new Promise((r) => setTimeout(r, 10));
     }
 
@@ -95,15 +95,55 @@ export function TournamentSimulator() {
 
   return (
     <div className="space-y-6">
+      {/* Mercados de Previsao */}
+      {showMarkets && (
+        <div className="panel p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
+              <TrendingUp className="w-4 h-4" />
+              Chances de Mercado (Polymarket / Kalshi)
+            </h3>
+            <span className="text-[9px] uppercase tracking-wider opacity-50">
+              Dados: Abr/2026
+            </span>
+          </div>
+          
+          <div className="space-y-2">
+            {marketData.slice(0, 15).map((market) => (
+              <div key={market.teamId} className="flex items-center gap-3 text-xs">
+                <span className="w-32 font-bold uppercase truncate">
+                  {market.teamId.toUpperCase()}
+                </span>
+                <div className="flex-1 bg-black/5 h-4 border border-foreground/10 relative">
+                  <div
+                    className="h-full bg-accent/80"
+                    style={{ width: `${Math.min(market.championImplied * 5, 100)}%` }}
+                  />
+                </div>
+                <div className="w-24 text-right">
+                  <span className="font-bold">{market.championImplied.toFixed(1)}%</span>
+                  <span className="text-[9px] opacity-50 ml-1">(odds {market.championOdds})</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-[9px] uppercase tracking-wider opacity-50 pt-2 border-t border-foreground/10">
+            Fonte: Sintese Polymarket + Kalshi + casas de apostas. Probabilidades implicitas calculadas de odds decimais.
+          </div>
+        </div>
+      )}
+
+      {/* Simulacao Monte Carlo */}
       <div className="panel p-4 space-y-4">
         <h3 className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
-          <Trophy className="w-4 h-4" />
-          Simulação da Copa Inteira
+          <Activity className="w-4 h-4" />
+          Simulacao Monte Carlo (Nosso Modelo)
         </h3>
 
         <div className="space-y-2">
           <label className="text-[10px] uppercase tracking-wider font-bold block">
-            Número de simulações: {iterations}
+            Numero de simulacoes: {iterations.toLocaleString()}
           </label>
           <input
             type="range"
@@ -148,26 +188,60 @@ export function TournamentSimulator() {
         )}
       </div>
 
+      {/* Resultados */}
       {results && (
         <div className="space-y-4">
-          <div className="panel p-4">
+          {/* Comparacao: Modelo vs Mercado */}
+          <div className="panel p-4 overflow-x-auto">
             <h4 className="text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2">
               <BarChart3 className="w-3 h-3" />
-              Chances de ser Campeão
+              Comparacao: Modelo vs Mercado (% Campeao)
+            </h4>
+            <table className="w-full text-[10px] uppercase tracking-wider">
+              <thead>
+                <tr className="border-b border-foreground/20">
+                  <th className="text-left px-2 py-1">Selecao</th>
+                  <th className="text-center px-1 py-1">Mercado</th>
+                  <th className="text-center px-1 py-1">Modelo</th>
+                  <th className="text-center px-1 py-1">Diferenca</th>
+                </tr>
+              </thead>
+              <tbody>
+                {results.slice(0, 15).map((stat) => {
+                  const market = getMarketData(stat.teamId);
+                  const marketProb = market?.championImplied ?? 0;
+                  const diff = stat.champion - marketProb;
+                  return (
+                    <tr key={stat.teamId} className="border-b border-foreground/5">
+                      <td className="px-2 py-1">
+                        <span className="font-bold">{stat.teamName}</span>
+                      </td>
+                      <td className="text-center px-1 py-1">{marketProb.toFixed(1)}%</td>
+                      <td className="text-center px-1 py-1 font-bold">{stat.champion.toFixed(1)}%</td>
+                      <td className={`text-center px-1 py-1 font-bold ${diff > 0 ? 'text-green-700' : diff < 0 ? 'text-red-700' : ''}`}>
+                        {diff > 0 ? '+' : ''}{diff.toFixed(1)}%
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Chances de campeao (modelo) */}
+          <div className="panel p-4">
+            <h4 className="text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2">
+              <Trophy className="w-3 h-3" />
+              Chances de ser Campeao (Modelo)
             </h4>
             <div className="space-y-2">
               {results.slice(0, 10).map((stat) => (
                 <div key={stat.teamId} className="flex items-center gap-3 text-xs">
-                  <img
-                    src={getTeamFlagUrl(stat.teamCode)}
-                    alt={stat.teamName}
-                    className="w-5 h-3 object-cover border border-foreground/30 shrink-0"
-                  />
                   <span className="w-32 font-bold uppercase truncate">{stat.teamName}</span>
                   <div className="flex-1 bg-black/5 h-4 border border-foreground/10 relative">
                     <div
                       className="h-full bg-foreground/80"
-                      style={{ width: `${Math.min(stat.champion, 100)}%` }}
+                      style={{ width: `${Math.min(stat.champion * 5, 100)}%` }}
                     />
                   </div>
                   <span className="w-12 text-right font-bold">{stat.champion.toFixed(1)}%</span>
@@ -176,85 +250,13 @@ export function TournamentSimulator() {
             </div>
           </div>
 
-          <div className="panel p-4 overflow-x-auto">
-            <h4 className="text-xs font-bold uppercase tracking-widest mb-3">
-              Probabilidades por Fase (%)
-            </h4>
-            <table className="w-full text-[10px] uppercase tracking-wider">
-              <thead>
-                <tr className="border-b border-foreground/20">
-                  <th className="text-left px-2 py-1">Seleção</th>
-                  <th className="text-center px-1 py-1">Grupo</th>
-                  <th className="text-center px-1 py-1">Oitavas</th>
-                  <th className="text-center px-1 py-1">Quartas</th>
-                  <th className="text-center px-1 py-1">Semi</th>
-                  <th className="text-center px-1 py-1">Final</th>
-                  <th className="text-center px-1 py-1">🏆</th>
-                </tr>
-              </thead>
-              <tbody>
-                {results.slice(0, 20).map((stat) => (
-                  <tr key={stat.teamId} className="border-b border-foreground/5">
-                    <td className="px-2 py-1 flex items-center gap-2">
-                      <img
-                        src={getTeamFlagUrl(stat.teamCode)}
-                        alt={stat.teamName}
-                        className="w-4 h-2.5 object-cover border border-foreground/30"
-                      />
-                      <span className="font-bold">{stat.teamName}</span>
-                    </td>
-                    <td className="text-center px-1 py-1">{stat.groupStage.toFixed(0)}</td>
-                    <td className="text-center px-1 py-1">{stat.roundOf16.toFixed(0)}</td>
-                    <td className="text-center px-1 py-1">{stat.quarterfinal.toFixed(0)}</td>
-                    <td className="text-center px-1 py-1">{stat.semifinal.toFixed(0)}</td>
-                    <td className="text-center px-1 py-1">{(stat.second + stat.champion).toFixed(0)}</td>
-                    <td className="text-center px-1 py-1 font-bold">{stat.champion.toFixed(1)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="panel p-4">
-            <h4 className="text-xs font-bold uppercase tracking-widest mb-3">
-              Estatísticas Médias (por simulação)
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {results.slice(0, 12).map((stat) => (
-                <div key={stat.teamId} className="border border-foreground/10 p-2">
-                  <div className="flex items-center gap-2 mb-1">
-                    <img
-                      src={getTeamFlagUrl(stat.teamCode)}
-                      alt={stat.teamName}
-                      className="w-4 h-2.5 object-cover border border-foreground/30"
-                    />
-                    <span className="text-[10px] font-bold uppercase">{stat.teamName}</span>
-                  </div>
-                  <div className="text-[10px] uppercase tracking-wider opacity-70 space-y-0.5">
-                    <div className="flex justify-between">
-                      <span>Pontos:</span>
-                      <span>{stat.avgPoints.toFixed(1)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Gols pró:</span>
-                      <span>{stat.avgGoalsFor.toFixed(1)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Gols contra:</span>
-                      <span>{stat.avgGoalsAgainst.toFixed(1)}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
           <div className="flex items-start gap-2 text-[10px] uppercase tracking-wider opacity-70 panel p-3">
             <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" />
             <p>
-              Simulação baseada em {iterations.toLocaleString()} execuções Monte Carlo.
-              Usa ranking FIFA, forma recente, média de gols e distribuição de Poisson.
-              Não constitui previsão garantida.
+              Simulacao baseada em {iterations.toLocaleString()} execucoes Monte Carlo.
+              Mercado = sintese Polymarket + Kalshi + casas de apostas.
+              Diferencas positivas (verde) indicam que o modelo avalia a selecao melhor que o mercado.
+              Nao constitui previsao garantida.
             </p>
           </div>
         </div>

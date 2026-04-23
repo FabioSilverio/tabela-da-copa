@@ -3,6 +3,7 @@ import { Courier_Prime } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const courier = Courier_Prime({
   weight: ["400", "700"],
@@ -42,11 +43,13 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`${courier.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-mono">
-        <Header />
-        <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-8">
-          {children}
-        </main>
-        <Footer />
+        <ThemeProvider>
+          <Header />
+          <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-8">
+            {children}
+          </main>
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );
