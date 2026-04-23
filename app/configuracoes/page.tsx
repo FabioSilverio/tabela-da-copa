@@ -7,6 +7,7 @@ import { Key, Save, Trash2, AlertTriangle, Check, Server, Globe } from "lucide-r
 export default function ConfiguracoesPage() {
   const [openaiKey, setOpenaiKey] = useState("");
   const [xaiKey, setXaiKey] = useState("");
+  const [xaiModel, setXaiModel] = useState("");
   const [saved, setSaved] = useState(false);
   const [testResult, setTestResult] = useState<{provider: string; success: boolean; message: string} | null>(null);
 
@@ -14,8 +15,10 @@ export default function ConfiguracoesPage() {
     // Carregar do localStorage (para desenvolvimento local)
     const oai = localStorage.getItem("openai_api_key");
     const xai = localStorage.getItem("xai_api_key");
+    const xaiM = localStorage.getItem("xai_model");
     if (oai) setOpenaiKey(oai);
     if (xai) setXaiKey(xai);
+    if (xaiM) setXaiModel(xaiM);
   }, []);
 
   const handleSave = () => {
@@ -24,6 +27,9 @@ export default function ConfiguracoesPage() {
     
     if (xaiKey) localStorage.setItem("xai_api_key", xaiKey);
     else localStorage.removeItem("xai_api_key");
+
+    if (xaiModel) localStorage.setItem("xai_model", xaiModel);
+    else localStorage.removeItem("xai_model");
     
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -32,8 +38,10 @@ export default function ConfiguracoesPage() {
   const handleClear = () => {
     setOpenaiKey("");
     setXaiKey("");
+    setXaiModel("");
     localStorage.removeItem("openai_api_key");
     localStorage.removeItem("xai_api_key");
+    localStorage.removeItem("xai_model");
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -49,10 +57,15 @@ export default function ConfiguracoesPage() {
         return;
       }
       
+      const body: Record<string, string> = { prompt: "Responda apenas 'OK'", apiKey };
+      if (provider === "xai" && xaiModel) {
+        body.model = xaiModel;
+      }
+      
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: "Responda apenas 'OK'", apiKey }),
+        body: JSON.stringify(body),
       });
       
       if (res.ok) {
@@ -126,6 +139,16 @@ export default function ConfiguracoesPage() {
               placeholder="xai-..."
               value={xaiKey}
               onChange={(e) => setXaiKey(e.target.value)}
+              className="retro-input w-full text-xs"
+            />
+            <label className="text-[10px] uppercase tracking-wider font-bold block pt-1">
+              xAI Modelo
+            </label>
+            <input
+              type="text"
+              placeholder="grok-2-latest, grok-4-20, etc."
+              value={xaiModel}
+              onChange={(e) => setXaiModel(e.target.value)}
               className="retro-input w-full text-xs"
             />
             <div className="flex items-center justify-between">
