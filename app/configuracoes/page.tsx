@@ -146,7 +146,7 @@ export default function ConfiguracoesPage() {
             </label>
             <input
               type="text"
-              placeholder="grok-2-latest, grok-4-20, etc."
+              placeholder="grok-4, grok-3-latest, grok-2, etc."
               value={xaiModel}
               onChange={(e) => setXaiModel(e.target.value)}
               className="retro-input w-full text-xs"

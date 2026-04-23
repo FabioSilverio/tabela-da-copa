@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { prompt, model = "grok-4-20", apiKey: clientKey } = await req.json();
+    const { prompt, model = "grok-4", apiKey: clientKey } = await req.json();
 
     if (!prompt || typeof prompt !== "string") {
       return NextResponse.json({ error: "Prompt inválido" }, { status: 400 });
