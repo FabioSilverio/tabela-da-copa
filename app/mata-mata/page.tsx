@@ -30,7 +30,7 @@ export default function KnockoutPage() {
         )}
         {data && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {groupMatches.slice(0, 12).map((match) => (
+            {groupMatches.map((match) => (
               <MatchCard key={match.id} match={match} />
             ))}
           </div>
