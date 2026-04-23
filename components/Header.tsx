@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { Menu, X, Trophy } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Menu, X, Trophy, Settings } from "lucide-react";
 import { SearchBar } from "./SearchBar";
 
 const navItems = [
@@ -16,9 +16,22 @@ const navItems = [
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
 
   return (
-    <header className="w-full border-b border-foreground retro-border">
+    <header className="w-full border-b border-foreground retro-border" ref={menuRef}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2 no-underline hover:bg-transparent">
@@ -36,6 +49,12 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
+            <Link
+              href="/configuracoes"
+              className="px-3 py-1 text-xs uppercase tracking-wider no-underline hover:bg-black/5 flex items-center gap-1"
+            >
+              <Settings className="w-3 h-3" />
+            </Link>
           </nav>
 
           <div className="hidden md:block">
@@ -45,7 +64,7 @@ export function Header() {
           <button
             type="button"
             className="md:hidden retro-btn p-2"
-            onClick={() => setOpen((prev) => !prev)}
+            onClick={() => setOpen(!open)}
             aria-label={open ? "Fechar menu" : "Abrir menu"}
             aria-expanded={open}
           >
@@ -54,26 +73,33 @@ export function Header() {
         </div>
       </div>
 
-      <div
-        className={`md:hidden border-t border-foreground retro-border bg-panel transition-all duration-200 overflow-hidden ${open ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
-        aria-hidden={!open}
-      >
-        <div className="px-4 py-3 space-y-2">
-          {navItems.map((item) => (
+      {open && (
+        <div className="md:hidden border-t border-foreground retro-border bg-panel">
+          <div className="px-4 py-3 space-y-2">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="block px-2 py-1 text-xs uppercase tracking-wider no-underline hover:bg-black/5"
+                onClick={() => setOpen(false)}
+              >
+                {item.label}
+              </Link>
+            ))}
             <Link
-              key={item.href}
-              href={item.href}
+              href="/configuracoes"
               className="block px-2 py-1 text-xs uppercase tracking-wider no-underline hover:bg-black/5"
               onClick={() => setOpen(false)}
             >
-              {item.label}
+              <Settings className="w-3 h-3 inline mr-1" />
+              Configurações
             </Link>
-          ))}
-          <div className="pt-2">
-            <SearchBar />
+            <div className="pt-2">
+              <SearchBar />
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </header>
   );
 }
